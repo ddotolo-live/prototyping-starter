@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Public_Sans } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { SidebarProvider, Sidebar, SidebarInset, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
+import { NavLogo } from "@/components/custom/nav-logo";
+import { ThemeToggle } from "@/components/custom/theme-toggle";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const publicSans = Public_Sans({
+  variable: "--font-public-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -25,9 +25,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${publicSans.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <SidebarProvider>
+            <Sidebar collapsible="icon">
+              <SidebarHeader>
+                <NavLogo />
+              </SidebarHeader>
+              <SidebarFooter className="h-full flex items-center justify-end p-4">
+                <ThemeToggle/>
+              </SidebarFooter>
+            </Sidebar>
+            <SidebarInset>
+              {children}
+            </SidebarInset>
+          </SidebarProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
