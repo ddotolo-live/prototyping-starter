@@ -5,23 +5,23 @@
 
 @theme inline {
   --color-background: var(--background);
-  --color-bg-0: var(--bg-0);
-  --color-bg-1: var(--bg-1);
-  --color-bg-2: var(--bg-2);
-  --color-bg-3: var(--bg-3);
-  --color-bg-serious-1: var(--bg-serious-1);
-  --color-bg-serious-2: var(--bg-serious-2);
+  --color-bg0: var(--bg0);
+  --color-bg1: var(--bg-1);
+  --color-bg2: var(--bg-2);
+  --color-bg3: var(--bg-3);
+  --color-bg-serious1: var(--bg-serious-1);
+  --color-bg-serious2: var(--bg-serious-2);
   --color-foreground: var(--foreground);
-  --color-fg-0: var(--fg-0);
-  --color-fg-1: var(--fg-1);
-  --color-fg-2: var(--fg-2);
-  --color-fg-3: var(--fg-3);
-  --color-fg-4: var(--fg-4);
-  --color-fg-5: var(--fg-5);
+  --color-fg0: var(--fg-0);
+  --color-fg1: var(--fg-1);
+  --color-fg2: var(--fg-2);
+  --color-fg3: var(--fg-3);
+  --color-fg4: var(--fg-4);
+  --color-fg5: var(--fg-5);
   --color-fg-accent-primary: var(--fg-accent-primary);
-  --color-fg-accent-2: var(--fg-accent-2);
-  --color-fg-serious-1: var(--fg-serious-1);
-  --color-fg-serious-2: var(--fg-serious-2);
+  --color-fg-accent2: var(--fg-accent-2);
+  --color-fg-serious1: var(--fg-serious-1);
+  --color-fg-serious2: var(--fg-serious-2);
   --font-sans: var(--font-public-sans);
   --font-mono: var(--font-public-sans);
   --color-sidebar-ring: var(--sidebar-ring);
