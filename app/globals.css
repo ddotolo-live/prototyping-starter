@@ -18,10 +18,12 @@
   --color-fg3: var(--fg-3);
   --color-fg4: var(--fg-4);
   --color-fg5: var(--fg-5);
-  --color-fg-accent-primary: var(--fg-accent-primary);
-  --color-fg-accent2: var(--fg-accent-2);
-  --color-fg-serious1: var(--fg-serious-1);
-  --color-fg-serious2: var(--fg-serious-2);
+  --color-separator1: var(--separator1);
+  --color-separator2: var(--separator2);
+  --color-fgAccent1: var(--fg-accent-primary);
+  --color-fgAccent2: var(--fg-accent-2);
+  --color-fgSerious1: var(--fg-serious-1);
+  --color-fgSerious2: var(--fg-serious-2);
   --font-sans: var(--font-public-sans);
   --font-mono: var(--font-public-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -79,6 +81,8 @@
   --fg-accent-2: #395CF9;
   --fg-serious-1: #B32909;
   --fg-serious-2: #FA4C39;
+  --separator1: #DBDBD8;
+  --separator2: #BDBDBB;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -130,6 +134,8 @@
   --fg-accent-2: #15889F;
   --fg-serious-1: #FF7566;
   --fg-serious-2: #791B11;
+  --separator1: #202020;
+  --separator2: #30302F;
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
@@ -152,7 +158,7 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: #070707;
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);

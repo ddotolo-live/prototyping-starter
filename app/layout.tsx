@@ -29,7 +29,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SidebarProvider>
-            <Sidebar collapsible="icon">
+            <Sidebar collapsible="icon" className="bg-bg1">
               <SidebarHeader>
                 <NavLogo />
               </SidebarHeader>
