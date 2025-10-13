@@ -1,25 +1,76 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { mockSessions } from "@/lib/mock-data";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbId,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
+import { ProjectPageHeader } from "@/components/custom/project-page-header";
+import Link from "next/link";
 
 export default function ComponentExamples() {
   return (
-    <div className="h-full w-full flex flex-col gap-4 items-start justify-start bg-bg0">
-      <div className="flex flex-col gap-2 bg-bg1 border-b p-4 w-full">
-        <h1 className="text-xl font-bold">Component Examples</h1>
-        <p className="text-fg2 text-sm">
-          Core components used to build and iterate on prototypes faster. See
-          the Bites & Bytes repo for production components.
-        </p>
-      </div>
-      {/* Button section */}
-      <div className="flex flex-col gap-4 w-full p-4">
+    <div className="h-screen w-full flex flex-col bg-bg0">
+      {/* Sticky Header */}
+      <ProjectPageHeader
+        crumbs={[
+          { label: "Prototyping Starter", href: "/" },
+          { label: "Components", href: "/" },
+          { label: "Library" },
+        ]}
+      >
+        <Link href="/">
+          <Button variant="outline" size="sm">
+            Home
+          </Button>
+        </Link>
+      </ProjectPageHeader>
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-auto" data-scroll-container>
+        <div className="flex flex-col gap-4 p-6">
+          <div className="flex flex-col gap-2">
+            <p className="text-fg2 text-sm">
+              Core components used to build and iterate on prototypes faster. See
+              the Bites & Bytes repo for production components.
+            </p>
+          </div>
+
+          {/* Button section */}
+          <div className="flex flex-col gap-4 w-full">
         <h2 className="text-lg font-bold">Button</h2>
         <Separator />
         <div className="flex flex-row gap-2">
@@ -30,15 +81,15 @@ export default function ComponentExamples() {
           <Button variant="destructive">Destructive button</Button>
         </div>
       </div>
-      {/* Input section */}
-      <div className="flex flex-col gap-4 w-full p-4">
+          {/* Input section */}
+          <div className="flex flex-col gap-4 w-full">
         <h2 className="text-lg font-bold">Input</h2>
         <Separator />
         <Input placeholder="Input" />
         <Textarea placeholder="Textarea" />
       </div>
-      {/* Select section */}
-      <div className="flex flex-col gap-4 w-full p-4">
+          {/* Select section */}
+          <div className="flex flex-col gap-4 w-full">
         <h2 className="text-lg font-bold">Select</h2>
         <Separator />
         <Select variant="primary" size="md">
@@ -52,8 +103,32 @@ export default function ComponentExamples() {
           </SelectContent>
         </Select>
       </div>
-      {/* Dialog section */}
-      <div className="flex flex-col gap-4 w-full p-4">
+          {/* Breadcrumb section */}
+          <div className="flex flex-col gap-4 w-full">
+        <h2 className="text-lg font-bold">Breadcrumb</h2>
+        <Separator />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="#">Project Name</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="#">Sessions</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbId href="#">RM_dTTtaqrTdUJt</BreadcrumbId>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Participants</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+          {/* Dialog section */}
+          <div className="flex flex-col gap-4 w-full">
         <h2 className="text-lg font-bold">Dialog</h2>
         <Separator />
         <Dialog>
@@ -61,7 +136,7 @@ export default function ComponentExamples() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Dialog Title</DialogTitle>
-              <DialogDescription>Dialog Description</DialogDescription> 
+              <DialogDescription>Dialog Description</DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-4 p-4">
               <Input placeholder="Input" />
@@ -74,8 +149,8 @@ export default function ComponentExamples() {
           </DialogContent>
         </Dialog>
       </div>
-      {/* Table section */}
-      <div className="flex flex-col gap-4 w-full p-4">
+          {/* Table section */}
+          <div className="flex flex-col gap-4 w-full">
         <h2 className="text-lg font-bold">Table</h2>
         <Separator />
         <Table>
@@ -94,8 +169,12 @@ export default function ComponentExamples() {
           <TableBody>
             {mockSessions.map((session) => (
               <TableRow key={session.sessionId}>
-                <TableCell className="font-mono text-xs">{session.sessionId}</TableCell>
-                <TableCell className="font-mono text-xs">{session.roomName}</TableCell>
+                <TableCell className="font-mono text-xs">
+                  {session.sessionId}
+                </TableCell>
+                <TableCell className="font-mono text-xs">
+                  {session.roomName}
+                </TableCell>
                 <TableCell>{session.startedAt}</TableCell>
                 <TableCell>{session.endedAt}</TableCell>
                 <TableCell>{session.duration}</TableCell>
@@ -114,6 +193,29 @@ export default function ComponentExamples() {
             ))}
           </TableBody>
         </Table>
+      </div>
+          {/* Tabs section */}
+          <div className="flex flex-col gap-4 w-full">
+        <h2 className="text-lg font-bold">Tabs</h2>
+        <Separator />
+        <Tabs defaultValue="1">
+          <TabsList>
+            <TabsTrigger value="1">Tab 1</TabsTrigger>
+            <TabsTrigger value="2">Tab 2</TabsTrigger>
+            <TabsTrigger value="3">Tab 3</TabsTrigger>
+          </TabsList>
+          <TabsContent value="1" className="flex flex-col gap-4 p-4 bg-bg2">
+            Tab 1
+          </TabsContent>
+          <TabsContent value="2" className="flex flex-col gap-4 p-4 bg-bg2">
+            Tab 2
+          </TabsContent>
+          <TabsContent value="3" className="flex flex-col gap-4 p-4 bg-bg2">
+            Tab 3
+          </TabsContent>
+        </Tabs>
+      </div>
+        </div>
       </div>
     </div>
   );
