@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,8 +43,17 @@ import {
 } from "@/components/ui/breadcrumb";
 import { ProjectPageHeader } from "@/components/custom/project-page-header";
 import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function ComponentExamples() {
+  // State for interactive checkboxes
+  const [checkbox1, setCheckbox1] = useState(true);
+  const [checkbox2, setCheckbox2] = useState(false);
+  const [checkbox3, setCheckbox3] = useState(true);
+  const [checkbox4, setCheckbox4] = useState(false);
+  
+  // State for select
+  const [selectValue, setSelectValue] = useState<string>("");
   return (
     <div className="h-screen w-full flex flex-col bg-bg0">
       {/* Sticky Header */}
@@ -81,6 +93,45 @@ export default function ComponentExamples() {
           <Button variant="destructive">Destructive button</Button>
         </div>
       </div>
+          {/* Checkbox section */}
+          <div className="flex flex-col gap-4 w-full">
+        <h2 className="text-lg font-bold">Checkbox</h2>
+        <Separator />
+        <div className="flex flex-col gap-4">
+          <label className="flex items-center gap-2 text-fg2 text-sm cursor-pointer">
+            <Checkbox 
+              checked={checkbox1} 
+              onCheckedChange={(checked) => setCheckbox1(checked === true)}
+              aria-label="Interactive checkbox" 
+            />
+            Interactive - Click me!
+          </label>
+          <label className="flex items-center gap-2 text-fg2 text-sm cursor-pointer">
+            <Checkbox 
+              checked={checkbox2} 
+              onCheckedChange={(checked) => setCheckbox2(checked === true)}
+              aria-label="Another interactive checkbox" 
+            />
+            Also interactive
+          </label>
+          <label className="flex items-center gap-2 text-fg2 text-sm opacity-60 cursor-not-allowed">
+            <Checkbox 
+              checked={checkbox3} 
+              disabled 
+              aria-label="Checked, disabled" 
+            />
+            Checked (disabled)
+          </label>
+          <label className="flex items-center gap-2 text-fg2 text-sm opacity-60 cursor-not-allowed">
+            <Checkbox 
+              checked={checkbox4} 
+              disabled 
+              aria-label="Unchecked, disabled" 
+            />
+            Unchecked (disabled)
+          </label>
+        </div>
+      </div>
           {/* Input section */}
           <div className="flex flex-col gap-4 w-full">
         <h2 className="text-lg font-bold">Input</h2>
@@ -92,16 +143,24 @@ export default function ComponentExamples() {
           <div className="flex flex-col gap-4 w-full">
         <h2 className="text-lg font-bold">Select</h2>
         <Separator />
-        <Select variant="primary" size="md">
+        <Select 
+          variant="primary" 
+          size="md" 
+          value={selectValue} 
+          onValueChange={setSelectValue}
+        >
           <SelectTrigger>
-            <SelectValue placeholder="Select" />
+            <SelectValue placeholder="Select an option" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="1">1</SelectItem>
-            <SelectItem value="2">2</SelectItem>
-            <SelectItem value="3">3</SelectItem>
+            <SelectItem value="option-1">Option 1</SelectItem>
+            <SelectItem value="option-2">Option 2</SelectItem>
+            <SelectItem value="option-3">Option 3</SelectItem>
           </SelectContent>
         </Select>
+        {selectValue && (
+          <p className="text-xs text-fg3">Selected: {selectValue}</p>
+        )}
       </div>
           {/* Breadcrumb section */}
           <div className="flex flex-col gap-4 w-full">
@@ -132,7 +191,9 @@ export default function ComponentExamples() {
         <h2 className="text-lg font-bold">Dialog</h2>
         <Separator />
         <Dialog>
-          <DialogTrigger>Open</DialogTrigger>
+          <DialogTrigger asChild>
+            <Button variant="outline">Open Dialog</Button>
+          </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Dialog Title</DialogTitle>
@@ -153,46 +214,48 @@ export default function ComponentExamples() {
           <div className="flex flex-col gap-4 w-full">
         <h2 className="text-lg font-bold">Table</h2>
         <Separator />
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Session ID</TableHead>
-              <TableHead>Room name</TableHead>
-              <TableHead>Started at</TableHead>
-              <TableHead>Ended at</TableHead>
-              <TableHead>Duration</TableHead>
-              <TableHead>Participants</TableHead>
-              <TableHead>Features</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {mockSessions.map((session) => (
-              <TableRow key={session.sessionId}>
-                <TableCell className="font-mono text-xs">
-                  {session.sessionId}
-                </TableCell>
-                <TableCell className="font-mono text-xs">
-                  {session.roomName}
-                </TableCell>
-                <TableCell>{session.startedAt}</TableCell>
-                <TableCell>{session.endedAt}</TableCell>
-                <TableCell>{session.duration}</TableCell>
-                <TableCell>{session.participants}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="gap-1">
-                    {session.features}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="text-xs">
-                    {session.status}
-                  </Badge>
-                </TableCell>
+        <div className="overflow-x-auto rounded-lg border border-separator1">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Session ID</TableHead>
+                <TableHead>Room name</TableHead>
+                <TableHead>Started at</TableHead>
+                <TableHead>Ended at</TableHead>
+                <TableHead>Duration</TableHead>
+                <TableHead>Participants</TableHead>
+                <TableHead>Features</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {mockSessions.map((session) => (
+                <TableRow key={session.sessionId}>
+                  <TableCell className="font-mono text-xs">
+                    {session.sessionId}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs">
+                    {session.roomName}
+                  </TableCell>
+                  <TableCell>{session.startedAt}</TableCell>
+                  <TableCell>{session.endedAt}</TableCell>
+                  <TableCell>{session.duration}</TableCell>
+                  <TableCell>{session.participants}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className="gap-1">
+                      {session.features}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">
+                      {session.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
           {/* Tabs section */}
           <div className="flex flex-col gap-4 w-full">
