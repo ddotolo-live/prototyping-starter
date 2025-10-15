@@ -177,4 +177,42 @@
     @apply bg-background text-foreground;
     font-family: var(--font-public-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
+
+  /* Webkit scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(189, 189, 187, 0.4); /* Light mode: border-intense */
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(189, 189, 187, 0.6);
+  }
+  
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(48, 48, 47, 0.5); /* Dark mode: separator2 */
+  }
+  
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(48, 48, 47, 0.7);
+  }
+  
+  /* Firefox scrollbar styling */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(189, 189, 187, 0.4) transparent; /* Light mode */
+  }
+  
+  .dark * {
+    scrollbar-color: rgba(48, 48, 47, 0.5) transparent; /* Dark mode */
+  }
 }

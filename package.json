@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "icons:clean": "rimraf icons/react",
+    "icons:generate": "svgr --config-file ./icons/scripts/svgr-config.cjs --silent ./icons/svgs/",
+    "icons:build": "pnpm icons:clean && pnpm icons:generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -59,12 +62,14 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@svgr/cli": "^8.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6",
     "typescript": "^5"
