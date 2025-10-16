@@ -80,30 +80,26 @@ function prepareIcon(
   });
 }
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  leftIcon,
-  rightIcon,
-  ...props
-}: ButtonProps) {
-  const Comp = asChild ? Slot : "button"
-  const leftIconPrepared = leftIcon ? prepareIcon(leftIcon, size) : null;
-  const rightIconPrepared = rightIcon ? prepareIcon(rightIcon, size) : null;
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, leftIcon, rightIcon, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
+    const leftIconPrepared = leftIcon ? prepareIcon(leftIcon, size) : null;
+    const rightIconPrepared = rightIcon ? prepareIcon(rightIcon, size) : null;
 
-  return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    >
-      {leftIconPrepared}
-      {props.children}
-      {rightIconPrepared}
-    </Comp>
-  )
-}
+    return (
+      <Comp
+        ref={ref}
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      >
+        {leftIconPrepared}
+        {props.children}
+        {rightIconPrepared}
+      </Comp>
+    )
+  }
+)
+Button.displayName = "Button"
 
 export { Button, buttonVariants, BUTTON_VARIANTS, BUTTON_SIZES }

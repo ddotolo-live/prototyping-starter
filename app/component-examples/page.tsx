@@ -49,8 +49,8 @@ export default function ComponentExamples() {
   // State for interactive checkboxes
   const [checkbox1, setCheckbox1] = useState(true);
   const [checkbox2, setCheckbox2] = useState(false);
-  const [checkbox3, setCheckbox3] = useState(true);
-  const [checkbox4, setCheckbox4] = useState(false);
+  const [checkbox3] = useState(true);
+  const [checkbox4] = useState(false);
   
   // State for select
   const [selectValue, setSelectValue] = useState<string>("");

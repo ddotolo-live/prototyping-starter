@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 export function NavLogo() {
-  const { state, toggleSidebar } = useSidebar();
+  const { toggleSidebar } = useSidebar();
   const metaKey = "Cmd"; // For macOS
   const shortcut = "B"; // Assuming uppercase for display
 
