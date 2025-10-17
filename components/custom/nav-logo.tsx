@@ -88,7 +88,7 @@ export function NavLogo() {
         xmlns="http://www.w3.org/2000/svg"
         className="mx-auto size-5 text-foreground group-data-[state=expanded]:hidden group-data-[state=collapsed]:group-hover:hidden"
       >
-        <g className="text-fg-accent-primary">
+        <g className="text-fgAccent1">
           <path d="M16.8005 11.1995H11.1996V16.8003H16.8005V11.1995Z" fill="currentcolor" />
           <path d="M22.4013 5.60083H16.8004V11.2017H22.4013V5.60083Z" fill="currentcolor" />
           <path d="M22.4013 16.8005H16.8004V22.4014H22.4013V16.8005Z" fill="currentcolor" />

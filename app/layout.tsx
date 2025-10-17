@@ -23,11 +23,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${publicSans.variable} antialiased`}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="system" 
+          enableSystem
+          disableTransitionOnChange={false}
+          storageKey="prototyping-theme"
+        >
           <SidebarProvider>
             <Sidebar collapsible="icon" className="bg-bg1">
               <SidebarHeader>
