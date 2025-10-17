@@ -88,20 +88,27 @@ function HistoryListItem({ item, isSelected, onSelect }: HistoryListItemProps) {
 }
 
 // Main Edit History Panel Component
-interface EditHistoryPanelProps {
+export interface EditHistoryPanelProps {
   trigger?: React.ReactNode;
+  historyItems?: HistoryItem[];
+  currentUserEmail?: string;
   onRevert?: (historyItem: HistoryItem) => void;
 }
 
 export default function EditHistoryPanel({
   trigger,
+  historyItems,
+  currentUserEmail = "dylan@example.com",
   onRevert,
 }: EditHistoryPanelProps) {
   const [open, setOpen] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
 
+  // Use provided history items or fallback to mock data
+  const displayItems = historyItems || mockHistoryData;
+
   const handleRevert = () => {
-    const selectedItem = mockHistoryData.find((item) => item.id === selectedId);
+    const selectedItem = displayItems.find((item) => item.id === selectedId);
     if (selectedItem && onRevert) {
       onRevert(selectedItem);
     }
@@ -138,16 +145,22 @@ export default function EditHistoryPanel({
 
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-auto px-6 pb-6 pt-1 min-h-0">
-          <div className="flex flex-col gap-2">
-            {mockHistoryData.map((item) => (
-              <HistoryListItem
-                key={item.id}
-                item={item}
-                isSelected={selectedId === item.id}
-                onSelect={() => setSelectedId(item.id)}
-              />
-            ))}
-          </div>
+          {displayItems.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-sm text-fg3">No edit history yet</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {displayItems.map((item) => (
+                <HistoryListItem
+                  key={item.id}
+                  item={item}
+                  isSelected={selectedId === item.id}
+                  onSelect={() => setSelectedId(item.id)}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Footer */}

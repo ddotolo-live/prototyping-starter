@@ -1,20 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { 
   ChevronDown, 
   ChevronUp, 
-  Search, 
-  Filter, 
   PlayCircle 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { mockVoices, mockVoiceProviders, type Voice } from "@/lib/mock-data";
+import { mockVoices, type Voice } from "@/lib/mock-data";
 
 interface VoiceSelectorProps {
   value: string;
@@ -92,14 +88,14 @@ function VoiceRow({ voice, isSelected, onClick }: VoiceRowProps) {
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center justify-between px-3 py-2 border-b border-separator1 hover:bg-bg3 transition-colors text-left",
+        "w-full flex items-start justify-between px-3 py-2 border-b border-separator1 hover:bg-bg3 transition-colors text-left",
         isSelected && "bg-bg3"
       )}
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <PlayCircle className="w-6 h-6 shrink-0 text-fg3" />
-        <div className="flex flex-col gap-0 min-w-0 flex-1">
-          <p className="text-xs font-semibold text-fg1 leading-[1.5] truncate">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <p className="text-xs font-semibold text-fg1 leading-[1.5] whitespace-nowrap">
             {voice.name}
           </p>
           <p className="text-xs font-normal text-fg3 leading-[1.5] truncate">
@@ -107,7 +103,7 @@ function VoiceRow({ voice, isSelected, onClick }: VoiceRowProps) {
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-3 shrink-0 ml-2">
         <span className="text-sm leading-[1.5]">{voice.flag}</span>
         <ProviderLogo provider={voice.provider} />
       </div>
@@ -122,11 +118,21 @@ export default function VoiceSelector({
 }: VoiceSelectorProps) {
   const [open, setOpen] = React.useState(false);
   const selectedVoice = mockVoices.find((v) => v.id === value) || mockVoices[1];
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const [triggerWidth, setTriggerWidth] = React.useState<number>(0);
+
+  // Measure trigger width
+  React.useEffect(() => {
+    if (triggerRef.current) {
+      setTriggerWidth(triggerRef.current.offsetWidth);
+    }
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
+          ref={triggerRef}
           className={cn(
             "w-full bg-bg2 border border-separator1 rounded-[4px] h-[30px] px-2 py-1.5",
             "flex items-center justify-between gap-2 text-left",
@@ -149,48 +155,11 @@ export default function VoiceSelector({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[691px] p-0 bg-bg2 border-separator1"
+        className="p-0 bg-bg2 border-separator1"
         align="start"
         sideOffset={2}
+        style={{ width: triggerWidth > 0 ? `${triggerWidth}px` : undefined }}
       >
-        {/* Search and Filters */}
-        <div className="flex items-center gap-3 p-3 border-b border-separator1">
-          {/* Search Input */}
-          <div className="flex-1 relative">
-            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-              <Search className="w-4 h-4 text-fg4" />
-            </div>
-            <Input
-              placeholder="Search voices"
-              className="pl-8 h-[30px] bg-bg2 border-separator1 text-xs text-fg1 placeholder:text-fg4"
-            />
-          </div>
-
-          {/* Filter Dropdowns */}
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-[30px] px-2 bg-bg2 border-separator1 text-fg1 hover:bg-bg3 text-xs font-semibold"
-            >
-              <Filter className="w-4 h-4 mr-1.5" />
-              <Separator orientation="vertical" className="h-4 mx-1.5" />
-              Provider
-              <ChevronDown className="w-2.5 h-2.5 ml-1.5 text-fg3" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-[30px] px-2 bg-bg2 border-separator1 text-fg1 hover:bg-bg3 text-xs font-semibold"
-            >
-              <Filter className="w-4 h-4 mr-1.5" />
-              <Separator orientation="vertical" className="h-4 mx-1.5" />
-              Gender
-              <ChevronDown className="w-2.5 h-2.5 ml-1.5 text-fg3" />
-            </Button>
-          </div>
-        </div>
-
         {/* Voice List */}
         <div className="flex items-start">
           <ScrollArea className="flex-1 h-[300px]">

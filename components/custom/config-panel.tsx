@@ -47,6 +47,7 @@ import Toggle from "@/components/custom/toggle";
 import { CircleCheckIcon, ArrowHistoryClock } from "../../icons/react";
 import AddToolPanel from "@/components/custom/add-tool-panel";
 import CollapsibleSection from "@/components/custom/collapsible-section";
+import type { HistoryItem } from "@/components/custom/edit-history-panel";
 
 // TypeScript interfaces
 export interface ConfigPanelProps {
@@ -84,8 +85,13 @@ export interface ConfigPanelProps {
   onSttServiceChange: (value: string) => void;
   onTtsServiceChange: (value: string) => void;
   onToolsChange: (tools: ToolItem[]) => void;
+  historyItems?: HistoryItem[];
+  onAddHistory?: (editName: string) => void;
+  currentUserEmail?: string;
   className?: string;
 }
+
+type SaveState = "idle" | "saving" | "saved";
 
 // TopBar stat component
 interface StatDisplayProps {
@@ -139,14 +145,32 @@ function StatDisplay({ label, value, percentage }: StatDisplayProps) {
 }
 
 // TopBar component
-function TopBar() {
+interface TopBarProps {
+  saveState: SaveState;
+  historyItems?: HistoryItem[];
+  currentUserEmail?: string;
+}
+
+function TopBar({ saveState, historyItems, currentUserEmail }: TopBarProps) {
   return (
     <div className="flex items-center gap-4 px-4 py-4 w-full">
       <StatDisplay label="Est. latency:" value="2,521ms" percentage={65} />
       <Separator orientation="vertical" className="h-7" />
       <StatDisplay label="Est. cost" value="$0.16/min" percentage={45} />
       <div className="flex-1 flex items-center justify-end gap-2">
+        {saveState === "saving" && (
+          <p className="text-xs font-normal italic text-fg3">
+            Saving changes...
+          </p>
+        )}
+        {saveState === "saved" && (
+          <p className="text-xs font-normal italic text-fg3">
+            All changes saved
+          </p>
+        )}
         <EditHistoryPanel
+          historyItems={historyItems}
+          currentUserEmail={currentUserEmail}
           trigger={
             <Button
               variant="secondary"
@@ -185,6 +209,27 @@ function FieldLabel({ label, description, action }: FieldLabelProps) {
   );
 }
 
+// Field label mapping for history entries
+const fieldLabels: Record<string, string> = {
+  name: "agent name",
+  systemInstructions: "system instructions",
+  welcomeMessage: "welcome message",
+  enableGreeting: "greeting settings",
+  greetingType: "greeting type",
+  allowInterrupt: "interrupt settings",
+  language: "language",
+  pipelineMode: "pipeline mode",
+  selectedVoice: "voice",
+  realtimeProvider: "realtime provider",
+  realtimeModel: "realtime model",
+  secretName: "secret name",
+  secretKey: "secret key",
+  llmModel: "language model",
+  sttService: "speech-to-text service",
+  ttsService: "text-to-speech service",
+  tools: "tools configuration",
+};
+
 // Main ConfigPanel component
 export default function ConfigPanel({
   name,
@@ -221,9 +266,184 @@ export default function ConfigPanel({
   onSttServiceChange,
   onTtsServiceChange,
   onToolsChange,
+  historyItems,
+  onAddHistory,
+  currentUserEmail = "dylan@example.com",
   className,
 }: ConfigPanelProps) {
-  
+  // Save state management
+  const [saveState, setSaveState] = React.useState<SaveState>("idle");
+  const saveTimerRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const savedTimerRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // History tracking
+  const [changedFields, setChangedFields] = React.useState<Set<string>>(new Set<string>());
+  const [pendingHistoryDescription, setPendingHistoryDescription] = React.useState<string | null>(null);
+  const historyTimerRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Custom voice/model mode state
+  const [useVoiceCustomMode, setUseVoiceCustomMode] = React.useState(false);
+  const [useModelCustomMode, setUseModelCustomMode] = React.useState(false);
+  const [customVoiceProvider, setCustomVoiceProvider] = React.useState("");
+  const [customVoiceId, setCustomVoiceId] = React.useState("");
+  const [customModelProvider, setCustomModelProvider] = React.useState("");
+  const [customModelId, setCustomModelId] = React.useState("");
+
+  // Handle field changes and trigger save state
+  const handleFieldChange = React.useCallback((fieldName: string) => {
+    // Update save state
+    setSaveState("saving");
+    
+    // Clear existing timers
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    
+    // Transition to "saved" after 1.5 seconds
+    saveTimerRef.current = setTimeout(() => {
+      setSaveState("saved");
+      
+      // Transition back to "idle" after another 1.5 seconds
+      savedTimerRef.current = setTimeout(() => {
+        setSaveState("idle");
+      }, 1500);
+    }, 1500);
+
+    // Track changed field for history
+    setChangedFields((prev) => new Set<string>(prev).add(fieldName));
+    
+    // Clear existing history timer
+    if (historyTimerRef.current) clearTimeout(historyTimerRef.current);
+    
+    // Create history entry after 3 seconds of inactivity
+    historyTimerRef.current = setTimeout(() => {
+      setChangedFields((currentFields) => {
+        if (currentFields.size > 0) {
+          // Generate description based on changed fields
+          const fieldArray = Array.from(currentFields);
+          const fieldNames = fieldArray.map((f) => fieldLabels[f] || f);
+          
+          let description: string;
+          if (fieldNames.length === 1) {
+            description = `Updated ${fieldNames[0]}`;
+          } else if (fieldNames.length === 2) {
+            description = `Updated ${fieldNames[0]} and ${fieldNames[1]}`;
+          } else {
+            const lastField = fieldNames[fieldNames.length - 1];
+            const otherFields = fieldNames.slice(0, -1).join(", ");
+            description = `Updated ${otherFields}, and ${lastField}`;
+          }
+          
+          // Set pending description to trigger useEffect
+          setPendingHistoryDescription(description);
+        }
+        return new Set<string>(); // Clear the set
+      });
+    }, 3000);
+  }, []);
+
+  // Effect to handle history updates (prevents setState during render)
+  React.useEffect(() => {
+    if (pendingHistoryDescription && onAddHistory) {
+      onAddHistory(pendingHistoryDescription);
+      setPendingHistoryDescription(null);
+    }
+  }, [pendingHistoryDescription, onAddHistory]);
+
+  // Cleanup timers on unmount
+  React.useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      if (historyTimerRef.current) clearTimeout(historyTimerRef.current);
+    };
+  }, []);
+
+  // Wrapped change handlers
+  const handleNameChange = (value: string) => {
+    onNameChange(value);
+    handleFieldChange("name");
+  };
+
+  const handleSystemInstructionsChange = (value: string) => {
+    onSystemInstructionsChange(value);
+    handleFieldChange("systemInstructions");
+  };
+
+  const handleWelcomeMessageChange = (value: string) => {
+    onWelcomeMessageChange(value);
+    handleFieldChange("welcomeMessage");
+  };
+
+  const handleEnableGreetingChange = (value: boolean) => {
+    onEnableGreetingChange(value);
+    handleFieldChange("enableGreeting");
+  };
+
+  const handleGreetingTypeChange = (value: "script" | "prompt") => {
+    onGreetingTypeChange(value);
+    handleFieldChange("greetingType");
+  };
+
+  const handleAllowInterruptChange = (value: boolean) => {
+    onAllowInterruptChange(value);
+    handleFieldChange("allowInterrupt");
+  };
+
+  const handleLanguageChange = (value: string) => {
+    onLanguageChange(value);
+    handleFieldChange("language");
+  };
+
+  const handlePipelineModeChange = (value: "pipeline" | "realtime") => {
+    onPipelineModeChange(value);
+    handleFieldChange("pipelineMode");
+  };
+
+  const handleVoiceChange = (value: string) => {
+    onVoiceChange(value);
+    handleFieldChange("selectedVoice");
+  };
+
+  const handleRealtimeProviderChange = (value: string) => {
+    onRealtimeProviderChange(value);
+    handleFieldChange("realtimeProvider");
+  };
+
+  const handleRealtimeModelChange = (value: string) => {
+    onRealtimeModelChange(value);
+    handleFieldChange("realtimeModel");
+  };
+
+  const handleSecretNameChange = (value: string) => {
+    onSecretNameChange(value);
+    handleFieldChange("secretName");
+  };
+
+  const handleSecretKeyChange = (value: string) => {
+    onSecretKeyChange(value);
+    handleFieldChange("secretKey");
+  };
+
+  const handleLlmModelChange = (value: string) => {
+    onLlmModelChange(value);
+    handleFieldChange("llmModel");
+  };
+
+  const handleSttServiceChange = (value: string) => {
+    onSttServiceChange(value);
+    handleFieldChange("sttService");
+  };
+
+  const handleTtsServiceChange = (value: string) => {
+    onTtsServiceChange(value);
+    handleFieldChange("ttsService");
+  };
+
+  const handleToolsChange = (newTools: ToolItem[]) => {
+    onToolsChange(newTools);
+    handleFieldChange("tools");
+  };
+
   return (
     <div
       className={cn(
@@ -232,7 +452,11 @@ export default function ConfigPanel({
       )}
     >
       {/* Top Bar */}
-      <TopBar />
+      <TopBar 
+        saveState={saveState} 
+        historyItems={historyItems}
+        currentUserEmail={currentUserEmail}
+      />
 
       {/* Tabs */}
       <Tabs
@@ -274,7 +498,7 @@ export default function ConfigPanel({
               />
               <Input
                 value={name}
-                onChange={(e) => onNameChange(e.target.value)}
+                onChange={(e) => handleNameChange(e.target.value)}
                 className="border-separator1 text-fg1 text-xs h-auto py-1.5 px-3"
               />
             </div>
@@ -307,7 +531,7 @@ export default function ConfigPanel({
               />
               <Textarea
                 value={systemInstructions}
-                onChange={(e) => onSystemInstructionsChange(e.target.value)}
+                onChange={(e) => handleSystemInstructionsChange(e.target.value)}
                 className="flex-1 min-h-0 border-separator1 bg-transparent text-fg1 text-xs leading-[1.5] resize-none"
               />
             </div>
@@ -322,7 +546,7 @@ export default function ConfigPanel({
                 />
                 <Toggle
                   checked={enableGreeting}
-                  onCheckedChange={onEnableGreetingChange}
+                  onCheckedChange={handleEnableGreetingChange}
                 />
               </div>
               
@@ -330,7 +554,7 @@ export default function ConfigPanel({
               <div className="flex items-center justify-between">
                 <RadioGroup
                   value={greetingType}
-                  onValueChange={(value) => onGreetingTypeChange(value as "script" | "prompt")}
+                  onValueChange={(value) => handleGreetingTypeChange(value as "script" | "prompt")}
                   className="flex items-center gap-2"
                   disabled={!enableGreeting}
                 >
@@ -358,7 +582,7 @@ export default function ConfigPanel({
               {/* Text Input */}
               <Textarea
                 value={welcomeMessage}
-                onChange={(e) => onWelcomeMessageChange(e.target.value)}
+                onChange={(e) => handleWelcomeMessageChange(e.target.value)}
                 className="border-separator1 bg-transparent text-fg1 text-xs h-[150px] px-3 py-1.5 resize-none"
                 disabled={!enableGreeting}
               />
@@ -368,7 +592,7 @@ export default function ConfigPanel({
                 <Checkbox
                   checked={allowInterrupt}
                   onCheckedChange={(checked) =>
-                    onAllowInterruptChange(checked as boolean)
+                    handleAllowInterruptChange(checked as boolean)
                   }
                   className="border-separator2"
                   disabled={!enableGreeting}
@@ -393,7 +617,7 @@ export default function ConfigPanel({
                 label="Language"
                 description="This is the default language your agent will speak in"
               />
-              <Select value={language} onValueChange={onLanguageChange}>
+              <Select value={language} onValueChange={handleLanguageChange}>
                 <SelectTrigger className="w-full border-separator1 bg-bg2 text-fg1 text-xs h-[30px] px-2">
                   <SelectValue />
                 </SelectTrigger>
@@ -401,7 +625,7 @@ export default function ConfigPanel({
                   {mockLanguages.map((lang) => (
                     <SelectItem key={lang.code} value={lang.code}>
                       <div className="flex items-center gap-2">
-                        <span>{lang.flag}</span>
+                        {/* <span>{lang.flag}</span> */}
                         <span>{lang.name}</span>
                       </div>
                     </SelectItem>
@@ -419,15 +643,11 @@ export default function ConfigPanel({
               <SegmentedControl
                 value={pipelineMode}
                 onValueChange={(val) =>
-                  onPipelineModeChange(val as "pipeline" | "realtime")
+                  handlePipelineModeChange(val as "pipeline" | "realtime")
                 }
                 options={[
                   { value: "pipeline", label: "Standard" },
-                  { 
-                    value: "realtime", 
-                    label: "Realtime",
-                    icon: <CircleCheckIcon className="h-3 w-3 text-fg1" />
-                  },
+                  { value: "realtime", label: "Realtime" },
                 ]}
               />
             </div>
@@ -459,15 +679,54 @@ export default function ConfigPanel({
                 <div className="flex flex-col gap-2">
                   <FieldLabel
                     label="Voice (TTS)"
-                    description="Converts your agent’s text response into speech using the selected voice."
+                    description="Converts your agent's text response into speech using the selected voice."
                   />
-                  <SelectionDropdown
-                    mode="voice"
-                    value={selectedVoice}
-                    onValueChange={onVoiceChange}
-                    items={mockVoices}
-                    providers={mockVoiceProviders}
-                  />
+                  {!useVoiceCustomMode ? (
+                    <>
+                      <SelectionDropdown
+                        mode="voice"
+                        value={selectedVoice}
+                        onValueChange={handleVoiceChange}
+                        items={mockVoices}
+                        providers={mockVoiceProviders}
+                      />
+                      <button
+                        onClick={() => setUseVoiceCustomMode(true)}
+                        className="text-xs text-fgAccent1 hover:underline cursor-pointer text-left"
+                      >
+                        Bring your own
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex gap-2">
+                        <Select value={customVoiceProvider} onValueChange={setCustomVoiceProvider}>
+                          <SelectTrigger className="flex-1 border-separator1 bg-bg2 text-fg1 text-xs h-[30px] px-2">
+                            <SelectValue placeholder="Select provider" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mockVoiceProviders.map((provider) => (
+                              <SelectItem key={provider.id} value={provider.id}>
+                                {provider.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          value={customVoiceId}
+                          onChange={(e) => setCustomVoiceId(e.target.value)}
+                          placeholder="Paste voice ID"
+                          className="flex-1 border-separator1 bg-bg2 text-fg1 text-xs h-[30px] py-1.5 px-2 placeholder:text-fg4"
+                        />
+                      </div>
+                      <button
+                        onClick={() => setUseVoiceCustomMode(false)}
+                        className="text-xs text-blue-500 hover:underline cursor-pointer text-left"
+                      >
+                        Use existing voices
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 {/* Language Model (LLM) Field */}
@@ -476,13 +735,52 @@ export default function ConfigPanel({
                     label="Language model (LLM)"
                     description="The AI model that generates your agents response"
                   />
-                  <SelectionDropdown
-                    mode="model"
-                    value={llmModel}
-                    onValueChange={onLlmModelChange}
-                    items={mockLLMModels}
-                    providers={mockLLMProviders}
-                  />
+                  {!useModelCustomMode ? (
+                    <>
+                      <SelectionDropdown
+                        mode="model"
+                        value={llmModel}
+                        onValueChange={handleLlmModelChange}
+                        items={mockLLMModels}
+                        providers={mockLLMProviders}
+                      />
+                      <button
+                        onClick={() => setUseModelCustomMode(true)}
+                        className="text-xs text-fgAccent1 hover:underline cursor-pointer text-left"
+                      >
+                        Bring your own
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex gap-2">
+                        <Select value={customModelProvider} onValueChange={setCustomModelProvider}>
+                          <SelectTrigger className="flex-1 border-separator1 bg-bg2 text-fg1 text-xs h-[30px] px-2">
+                            <SelectValue placeholder="Select provider" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mockLLMProviders.map((provider) => (
+                              <SelectItem key={provider.id} value={provider.id}>
+                                {provider.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          value={customModelId}
+                          onChange={(e) => setCustomModelId(e.target.value)}
+                          placeholder="Paste model ID"
+                          className="flex-1 border-separator1 bg-bg2 text-fg1 text-xs h-[30px] py-1.5 px-2 placeholder:text-fg4"
+                        />
+                      </div>
+                      <button
+                        onClick={() => setUseModelCustomMode(false)}
+                        className="text-xs text-blue-500 hover:underline cursor-pointer text-left"
+                      >
+                        Use existing models
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 {/* Speech-to-Text (STT) Field */}
@@ -491,7 +789,7 @@ export default function ConfigPanel({
                     label="Speech-to-text (STT)"
                     description="Converts caller speech into text for processing"
                   />
-                  <Select value={sttService} onValueChange={onSttServiceChange}>
+                  <Select value={sttService} onValueChange={handleSttServiceChange}>
                     <SelectTrigger className="w-full border-separator1 bg-bg2 text-fg1 text-xs h-[30px] px-2">
                       <SelectValue />
                     </SelectTrigger>
@@ -516,7 +814,7 @@ export default function ConfigPanel({
                     label="Select model"
                     description="The AI model that handles both conversation and voice generation"
                   />
-                  <Select value={realtimeModel} onValueChange={onRealtimeModelChange}>
+                  <Select value={realtimeModel} onValueChange={handleRealtimeModelChange}>
                     <SelectTrigger className="w-full border-separator1 bg-bg2 text-fg1 text-xs h-[30px] px-2">
                       <SelectValue />
                     </SelectTrigger>
@@ -539,13 +837,13 @@ export default function ConfigPanel({
                   <div className="flex gap-4">
                     <Input
                       value={secretName}
-                      onChange={(e) => onSecretNameChange(e.target.value)}
+                      onChange={(e) => handleSecretNameChange(e.target.value)}
                       placeholder="PROVIDER_API_KEY"
                       className="flex-1 border-separator2 text-fg1 text-xs h-auto py-1.5 px-2 placeholder:text-fg4"
                     />
                     <Input
                       value={secretKey}
-                      onChange={(e) => onSecretKeyChange(e.target.value)}
+                      onChange={(e) => handleSecretKeyChange(e.target.value)}
                       placeholder="YOUR_SECRET"
                       className="flex-1 border-separator2 text-fg1 text-xs h-auto py-1.5 px-2 placeholder:text-fg4"
                     />
@@ -558,13 +856,52 @@ export default function ConfigPanel({
                     label="Voice"
                     description="The voice your agent will use when speaking"
                   />
-                  <SelectionDropdown
-                    mode="voice"
-                    value={selectedVoice}
-                    onValueChange={onVoiceChange}
-                    items={mockVoices}
-                    providers={mockVoiceProviders}
-                  />
+                  {!useVoiceCustomMode ? (
+                    <>
+                      <SelectionDropdown
+                        mode="voice"
+                        value={selectedVoice}
+                        onValueChange={handleVoiceChange}
+                        items={mockVoices}
+                        providers={mockVoiceProviders}
+                      />
+                      <button
+                        onClick={() => setUseVoiceCustomMode(true)}
+                        className="text-xs text-fgAccent1 hover:underline cursor-pointer text-left"
+                      >
+                        Bring your own
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex gap-2">
+                        <Select value={customVoiceProvider} onValueChange={setCustomVoiceProvider}>
+                          <SelectTrigger className="flex-1 border-separator1 bg-bg2 text-fg1 text-xs h-[30px] px-2">
+                            <SelectValue placeholder="Select provider" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mockVoiceProviders.map((provider) => (
+                              <SelectItem key={provider.id} value={provider.id}>
+                                {provider.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          value={customVoiceId}
+                          onChange={(e) => setCustomVoiceId(e.target.value)}
+                          placeholder="Paste voice ID"
+                          className="flex-1 border-separator1 bg-bg2 text-fg1 text-xs h-[30px] py-1.5 px-2 placeholder:text-fg4"
+                        />
+                      </div>
+                      <button
+                        onClick={() => setUseVoiceCustomMode(false)}
+                        className="text-xs text-blue-500 hover:underline cursor-pointer text-left"
+                      >
+                        Use existing voices
+                      </button>
+                    </>
+                  )}
                 </div>
               </>
             )}
@@ -619,7 +956,7 @@ export default function ConfigPanel({
                                 const updatedTools = tools.map((t) =>
                                   t.id === tool.id ? { ...t, enabled: checked } : t
                                 );
-                                onToolsChange(updatedTools);
+                                handleToolsChange(updatedTools);
                               }}
                             />
                           </div>
@@ -642,7 +979,7 @@ export default function ConfigPanel({
                     <AddToolPanel
                       onSave={(newTool) => {
                         const updatedTools = [...tools, newTool];
-                        onToolsChange(updatedTools);
+                        handleToolsChange(updatedTools);
                       }}
                       trigger={
                         <Button
@@ -690,7 +1027,7 @@ export default function ConfigPanel({
                                     const updatedTools = tools.map((t) =>
                                       t.id === tool.id ? updatedTool : t
                                     );
-                                    onToolsChange(updatedTools);
+                                    handleToolsChange(updatedTools);
                                   }}
                                   trigger={
                                     <Button
@@ -708,7 +1045,7 @@ export default function ConfigPanel({
                                     const updatedTools = tools.map((t) =>
                                       t.id === tool.id ? { ...t, enabled: checked } : t
                                     );
-                                    onToolsChange(updatedTools);
+                                    handleToolsChange(updatedTools);
                                   }}
                                 />
                               </div>

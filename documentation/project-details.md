@@ -59,3 +59,80 @@ All components have been updated to use the new camelCase token naming conventio
 - ✅ UI components (`components/ui/`)
 
 Token references now consistently use camelCase (e.g., `text-fgAccent1`, `bg-bgSerious1`, `border-separator1`) matching the CSS variable definitions.
+
+## Auto-Save & Edit History
+
+The ConfigPanel component now includes automatic saving functionality with visual feedback and edit history tracking.
+
+### Features
+
+#### Save State Indicator
+- **Visual Feedback**: Displays "Saving changes..." and "All changes saved" messages in the top bar
+- **Timing**: Shows "Saving changes..." for 1.5s, then "All changes saved" for 1.5s before disappearing
+- **Styling**: Italic text in `text-fg3` color matching design specifications
+
+#### Debounced History Tracking
+- **Automatic Grouping**: Changes made within 3 seconds are grouped into a single history entry
+- **Smart Descriptions**: Generates human-readable descriptions based on changed fields
+  - Single field: "Updated agent name"
+  - Multiple fields: "Updated agent name, voice, and language"
+- **Field Mapping**: All config fields have descriptive labels for history entries
+
+### Implementation
+
+#### ConfigPanel Component
+```tsx
+<ConfigPanel
+  // ... existing config props
+  historyItems={historyItems}
+  onAddHistory={handleAddHistory}
+  currentUserEmail="user@example.com"
+/>
+```
+
+#### Parent Component Setup
+```tsx
+const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+
+const handleAddHistory = (editName: string) => {
+  const newHistoryItem: HistoryItem = {
+    id: Date.now().toString(),
+    editName,
+    userEmail: "user@example.com",
+    timestamp: "Just now",
+  };
+  setHistoryItems((prev) => [newHistoryItem, ...prev]);
+};
+```
+
+#### EditHistoryPanel Component
+- **Flexible Data Source**: Accepts `historyItems` prop or falls back to mock data
+- **Empty State**: Shows "No edit history yet" message when no items exist
+- **Current Implementation**: View-only panel showing history chronologically
+
+### Technical Details
+
+#### Save State Flow
+1. User changes any field → state changes to "saving"
+2. After 1.5s → state changes to "saved"
+3. After another 1.5s → state returns to "idle"
+4. New changes during saved/saving → restart timer
+
+#### History Entry Flow
+1. Field change tracked in Set
+2. 3 second inactivity timer starts
+3. On timer completion → generate description and create history entry
+4. Clear tracked changes
+5. New changes → restart timer
+
+#### Tracked Fields
+All ConfigPanel fields are tracked including:
+- Identity: name, system instructions, welcome message
+- Voice & Models: language, pipeline mode, voice, models, API keys
+- Behavior: greeting settings, tools configuration
+
+### Future Enhancements
+- Implement revert functionality in EditHistoryPanel
+- Add visual diff between history versions
+- Support for collaborative editing with multiple users
+- Persist history to backend/database

@@ -3,6 +3,7 @@
 import * as React from "react";
 import * as SwitchPrimitive from "@radix-ui/react-switch";
 import { cn } from "@/lib/utils";
+import { Checkmark2SmallIcon } from "../../icons/react";
 
 export interface ToggleProps
   extends React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
@@ -20,12 +21,12 @@ export default function Toggle({
   ...props
 }: ToggleProps) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-2">
       <SwitchPrimitive.Root
         className={cn(
-          "inline-flex items-center w-[40px] h-[20px] p-[2px] rounded border border-separator1 cursor-pointer",
-          "data-[state=checked]:bg-fgAccent1 data-[state=unchecked]:bg-bg3",
-          "data-[state=checked]:border-[#1FD5F9] data-[state=unchecked]:border-separator1",
+          "inline-flex items-center w-[32px] h-[16px] rounded border border-separator1 cursor-pointer",
+          "data-[state=checked]:bg-fgAccent2 data-[state=unchecked]:bg-bg3",
+          "data-[state=checked]:border-fgAccent1 data-[state=unchecked]:border-separator2",
           "transition-colors",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           "hover:opacity-90",
@@ -37,13 +38,15 @@ export default function Toggle({
       >
         <SwitchPrimitive.Thumb
           className={cn(
-            "block size-4 rounded-xs shrink-0 border",
-            "data-[state=checked]:bg-[#ffffff] data-[state=unchecked]:bg-fg1",
-            "data-[state=checked]:border-[#15889F] data-[state=unchecked]:border-separator1",
-            "data-[state=checked]:translate-x-[19px] data-[state=unchecked]:translate-x-0",
+            "flex items-center justify-center size-4 rounded-[3px] shrink-0 border",
+            "data-[state=checked]:bg-bg0 data-[state=unchecked]:bg-bg0",
+            "data-[state=checked]:border-fgAccent1 data-[state=unchecked]:border-fg4",
+            "data-[state=checked]:translate-x-[18px] data-[state=unchecked]:translate-x-0",
             "transition-transform duration-200 ease-out"
           )}
-        />
+        >
+          <Checkmark2SmallIcon data-state={checked ? "checked" : "unchecked"} className="w-3 h-3 data-[state=checked]:text-fgAccent1 data-[state=unchecked]:text-bg0" />
+        </SwitchPrimitive.Thumb>
       </SwitchPrimitive.Root>
       {showLabel && (
         <span

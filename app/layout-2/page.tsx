@@ -11,6 +11,7 @@ import SegmentedControl from "@/components/custom/segmented-control";
 import { DeploymentPanel } from "@/components/custom/deployment-panel";
 import { ChainLink3Icon, CodeBracketsIcon } from "../../icons/react";
 import { mockTools } from "@/lib/mock-data";
+import type { HistoryItem } from "@/components/custom/edit-history-panel";
 
 export default function Home() {
   // State management for active panel view
@@ -55,6 +56,21 @@ export default function Home() {
     ttsService: "elevenlabs",
     tools: mockTools,
   });
+
+  // State management for edit history
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  
+  // Function to add new history entry
+  const handleAddHistory = (editName: string) => {
+    const newHistoryItem: HistoryItem = {
+      id: Date.now().toString(),
+      editName,
+      userEmail: "dylan@example.com",
+      timestamp: "Just now",
+    };
+    
+    setHistoryItems((prev) => [newHistoryItem, ...prev]);
+  };
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#070707]">
@@ -180,6 +196,9 @@ export default function Home() {
               sttService={config.sttService}
               ttsService={config.ttsService}
               tools={config.tools}
+              historyItems={historyItems}
+              onAddHistory={handleAddHistory}
+              currentUserEmail="dylan@example.com"
               onNameChange={(value) =>
                 setConfig((prev) => ({ ...prev, name: value }))
               }

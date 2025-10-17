@@ -3,6 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { CircleCheckIcon } from "@/icons/react";
 
 export interface SegmentedControlProps {
   value: string;
@@ -46,9 +47,12 @@ export default function SegmentedControl({
               // Adjust focus ring to stay within container
               "focus-visible:ring-offset-0",
               // Optimize transitions - only transition properties that actually change
-              "!transition-colors !duration-150"
+              "!transition-colors !duration-150",
+              // Add gap for icon when active
+              isActive && "!gap-1"
             )}
           >
+            {isActive && <CircleCheckIcon className="h-3 w-3 text-fg1" />}
             {option.label}
           </Button>
         );

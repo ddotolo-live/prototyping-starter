@@ -241,6 +241,8 @@ export default function SelectionDropdown({
   const [selectedGender, setSelectedGender] = React.useState<string | null>(
     null
   );
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const [triggerWidth, setTriggerWidth] = React.useState<number>(0);
 
   // Get selected item
   const selectedItem = items.find((item) => item.id === value) || items[0];
@@ -309,6 +311,13 @@ export default function SelectionDropdown({
     { id: "neutral", name: "Neutral" },
   ];
 
+  // Measure trigger width
+  React.useEffect(() => {
+    if (triggerRef.current) {
+      setTriggerWidth(triggerRef.current.offsetWidth);
+    }
+  }, []);
+
   // Reset filters when dropdown closes
   React.useEffect(() => {
     if (!open) {
@@ -323,6 +332,7 @@ export default function SelectionDropdown({
     if (mode === "voice") {
       return (
         <button
+          ref={triggerRef}
           className={cn(
             "w-full bg-bg2 border border-separator1 rounded-[4px] h-[30px] px-2 py-1.5",
             "flex items-center justify-between gap-2 text-left",
@@ -349,6 +359,7 @@ export default function SelectionDropdown({
       const selectedModel = selectedItem as LLMModel;
       return (
         <button
+          ref={triggerRef}
           className={cn(
             "w-full bg-bg2 border border-separator1 rounded-[4px] h-[30px] px-2 py-1.5",
             "flex items-center justify-between gap-2 text-left",
@@ -377,9 +388,10 @@ export default function SelectionDropdown({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{renderTrigger()}</PopoverTrigger>
       <PopoverContent
-        className="w-[607px] p-0 bg-bg2 border-separator1"
+        className="p-0 bg-bg2 border-separator1"
         align="start"
         sideOffset={2}
+        style={{ width: triggerWidth > 0 ? `${triggerWidth}px` : undefined }}
       >
         {/* Search and Filters */}
         <div className="flex items-center gap-3 p-3 border-b border-separator1">
