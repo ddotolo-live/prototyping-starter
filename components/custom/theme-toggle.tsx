@@ -4,6 +4,7 @@ import { useTheme } from "next-themes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Moon, Sun, Monitor } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useEffect, useState } from "react";

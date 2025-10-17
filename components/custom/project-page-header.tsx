@@ -76,7 +76,7 @@ export function ProjectPageHeader({
 
   return (
     <div
-      style={{ height: h_container, transition: 'height 150ms ease-out' }}
+      style={{ height: h_container, transition: 'height 150ms ease-out', willChange: 'height' }}
       className="sticky top-0 z-50 flex w-full flex-row place-content-between gap-1 border-b border-separator1 bg-bg1 px-4"
     >
       {/* Breadcrumbs and Title */}

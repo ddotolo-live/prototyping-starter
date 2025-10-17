@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Public_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SidebarProvider, Sidebar, SidebarInset, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
+import { SidebarProvider, Sidebar, SidebarInset, SidebarHeader, SidebarContent, SidebarFooter } from "@/components/ui/sidebar";
 import { NavLogo } from "@/components/custom/nav-logo";
+import { NavMenu } from "@/components/custom/nav-menu";
 import { ThemeToggle } from "@/components/custom/theme-toggle";
 
 const publicSans = Public_Sans({
@@ -25,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${publicSans.variable} antialiased`}
+        className={`${publicSans.variable} antialiased h-screen overflow-hidden`}
       >
         <ThemeProvider 
           attribute="class" 
@@ -39,11 +40,14 @@ export default function RootLayout({
               <SidebarHeader>
                 <NavLogo />
               </SidebarHeader>
-              <SidebarFooter className="h-full flex items-center justify-end p-4">
+              <SidebarContent className="px-3 py-2">
+                <NavMenu />
+              </SidebarContent>
+              <SidebarFooter className="mt-auto p-4">
                 <ThemeToggle/>
               </SidebarFooter>
             </Sidebar>
-            <SidebarInset>
+            <SidebarInset className="h-screen overflow-hidden">
               {children}
             </SidebarInset>
           </SidebarProvider>

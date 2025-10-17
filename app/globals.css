@@ -312,3 +312,47 @@
     scrollbar-color: rgba(48, 48, 47, 0.5) transparent; /* Dark mode */
   }
 }
+
+@layer utilities {
+  .dot-grid-bg {
+    background-image: 
+      radial-gradient(circle, rgba(0, 0, 0, 0.15) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: 0 0;
+  }
+  
+  .dark .dot-grid-bg {
+    background-image: 
+      radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 8px 8px;
+    background-position: 0 0;
+  }
+  
+  /* Waveform animations */
+  @keyframes wave-1 {
+    0%, 100% { height: 10px; }
+    50% { height: 6px; }
+  }
+  
+  @keyframes wave-2 {
+    0%, 100% { height: 3px; }
+    50% { height: 10px; }
+  }
+  
+  @keyframes wave-3 {
+    0%, 100% { height: 12px; }
+    50% { height: 4px; }
+  }
+  
+  .animate-wave-1 {
+    animation: wave-1 0.8s ease-in-out infinite;
+  }
+  
+  .animate-wave-2 {
+    animation: wave-2 0.8s ease-in-out infinite 0.2s;
+  }
+  
+  .animate-wave-3 {
+    animation: wave-3 0.8s ease-in-out infinite 0.4s;
+  }
+}
