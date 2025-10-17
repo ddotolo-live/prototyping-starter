@@ -2,10 +2,19 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { LoaderIcon, ChevronTopSmallIcon, CircleCheckIcon, CircleXIcon } from "@/icons/react";
 import { Button } from "@/components/ui/button";
 import { BackgroundPattern } from "@/components/custom/BackgroundPattern";
+
+// Helper to get computed CSS variable value
+function getCssVariable(variableName: string): string {
+  if (typeof window === 'undefined') return '';
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(variableName)
+    .trim();
+}
 
 export interface DeploymentPanelProps {
   status: "deploying" | "success";
@@ -80,14 +89,30 @@ export function DeploymentPanel({
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
   const [visibleLogs, setVisibleLogs] = React.useState<DeploymentLog[]>([]);
   const [containerWidth, setContainerWidth] = React.useState(0);
   const [triggerRipple, setTriggerRipple] = React.useState(false);
+  const [successColor, setSuccessColor] = React.useState('#4ade80'); // Default fallback
 
-  // Measure container width for BackgroundPattern
+  // Handle client-side mounting
   React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Measure container width for BackgroundPattern and read success color
+  React.useEffect(() => {
+    if (!mounted) return;
+    
     if (containerRef.current) {
       setContainerWidth(containerRef.current.offsetWidth);
+    }
+    
+    // Read the success color from CSS variables (updates on theme change)
+    const color = getCssVariable('--fgSuccess');
+    if (color) {
+      setSuccessColor(color);
     }
     
     const handleResize = () => {
@@ -98,7 +123,7 @@ export function DeploymentPanel({
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [mounted, resolvedTheme]); // Re-run when mounted or theme changes
 
   // Auto-scroll to bottom when logs update
   React.useEffect(() => {
@@ -269,11 +294,6 @@ export function DeploymentPanel({
                 width={containerWidth}
                 height={successHeight}
                 animationDelay={0}
-                colors={{
-                  off: 0x0a1a0f,      // Darker green/gray
-                  light: 0x2d5a3d,    // Muted success green
-                  accent: 0x4ade80,   // Bright success green
-                }}
                 triggerRipple={triggerRipple}
               />
             </motion.div>
@@ -298,7 +318,7 @@ export function DeploymentPanel({
                 }
                 className="w-32 h-32 rounded-full"
                 style={{
-                  background: 'radial-gradient(circle, rgba(74, 222, 128, 0.6) 0%, rgba(74, 222, 128, 0.3) 30%, transparent 70%)',
+                  background: `radial-gradient(circle, ${successColor}99 0%, ${successColor}4D 30%, transparent 70%)`,
                   filter: 'blur(8px)',
                 }}
               />

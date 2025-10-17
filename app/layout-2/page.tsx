@@ -101,8 +101,9 @@ export default function Home() {
           </Button>
 
           <Button
+            variant="primary"
             size="sm"
-            className="h-7 bg-fgAccent1 text-bg1 hover:bg-[#1ac5e5] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => {
               setIsDeploymentVisible(true);
               setDeploymentStatus("deploying");

@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import * as THREE from 'three';
+import { useTheme } from 'next-themes';
 
 import { useWebGLSupport } from '@/lib/hooks/useWebGLSupport';
+import { getCssVariableAsHex } from '@/lib/utils';
 
 type HomeHeroBackgroundProps = {
   width: number;
@@ -44,11 +46,46 @@ export const BackgroundPattern = ({
   const canUseWebGL = useWebGLSupport();
   const tempColor = new THREE.Color();
   const rippleTriggeredRef = useRef(false);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  // Use provided colors or defaults
-  const offColor = new THREE.Color(colors?.off ?? defaultOffColor);
-  const lightColor = new THREE.Color(colors?.light ?? defaultLightColor);
-  const accentColor = new THREE.Color(colors?.accent ?? defaultAccentColor);
+  // Handle client-side mounting to prevent hydration issues
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Compute theme-aware colors from CSS variables
+  const themeColors = useMemo(() => {
+    if (!mounted || typeof window === 'undefined') {
+      // Return default colors during SSR or before mount
+      return {
+        off: colors?.off ?? defaultOffColor.getHex(),
+        light: colors?.light ?? defaultLightColor.getHex(),
+        accent: colors?.accent ?? defaultAccentColor.getHex(),
+      };
+    }
+
+    // If custom colors provided, use them
+    if (colors?.off !== undefined && colors?.light !== undefined && colors?.accent !== undefined) {
+      return {
+        off: colors.off,
+        light: colors.light,
+        accent: colors.accent,
+      };
+    }
+
+    // Otherwise, read from CSS variables based on theme
+    return {
+      off: getCssVariableAsHex('--bgSuccess1'),
+      light: getCssVariableAsHex('--bgSuccess2'),
+      accent: getCssVariableAsHex('--fgSuccess'),
+    };
+  }, [resolvedTheme, mounted, colors]);
+
+  // Use theme colors
+  const offColor = new THREE.Color(themeColors.off);
+  const lightColor = new THREE.Color(themeColors.light);
+  const accentColor = new THREE.Color(themeColors.accent);
 
   const randomColor = (offPercentage: number, onPercentage: number) => {
     const random = Math.random();

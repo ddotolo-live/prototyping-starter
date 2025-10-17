@@ -24,8 +24,8 @@ export function NavMenu() {
               className={cn(
                 "h-9 transition-colors",
                 isActive
-                  ? "bg-[#1f1f1f] text-[#1fd5f9] hover:bg-[#252525] hover:text-[#1fd5f9]"
-                  : "text-[#cccccc] hover:bg-[#1a1a1a] hover:text-[#ffffff]"
+                  ? "bg-bgAccent1 text-fgAccent1 hover:bg-bgAccent1 hover:text-fgAccent1"
+                  : "text-fg1 hover:bg-bg2 hover:text-fg1"
               )}
             >
               <Link href={item.href}>

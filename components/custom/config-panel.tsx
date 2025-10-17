@@ -242,21 +242,21 @@ export default function ConfigPanel({
         <TabsList className="w-full justify-start rounded-none border-b border-separator1 bg-transparent px-4 h-auto flex-shrink-0 gap-2">
           <TabsTrigger
             value="instructions"
-            className="relative px-2 pb-2 pt-0 rounded-none border-b-2 border-transparent data-[state=active]:border-[#07b6da] data-[state=active]:text-fg1 text-fg4 font-semibold text-sm tracking-normal capitalize hover:text-fg1 cursor-pointer"
+            className="cursor-pointer"
           >
             Identity
           </TabsTrigger>
           <TabsTrigger
             value="voice"
-            className="relative px-2 pb-2 pt-0 rounded-none border-b-2 border-transparent data-[state=active]:border-[#07b6da] data-[state=active]:text-fg1 text-fg4 font-semibold text-sm tracking-normal capitalize hover:text-fg1 cursor-pointer"
+            className="cursor-pointer"
           >
             Models & Voice
           </TabsTrigger>
           <TabsTrigger
-            value="actions"
-            className="relative px-2 pb-2 pt-0 rounded-none border-b-2 border-transparent data-[state=active]:border-[#07b6da] data-[state=active]:text-fg1 text-fg4 font-semibold text-sm tracking-normal capitalize hover:text-fg1 cursor-pointer"
+            value="behavior"
+            className="cursor-pointer"
           >
-            Actions
+            Behavior
           </TabsTrigger>
         </TabsList>
 
@@ -436,7 +436,7 @@ export default function ConfigPanel({
             {pipelineMode === "pipeline" && (
               <>
                 {/* Text-to-Speech (TTS) Field */}
-                <div className="flex flex-col gap-2">
+                {/* <div className="flex flex-col gap-2">
                   <FieldLabel
                     label="Text-to-speech (TTS)"
                     description="Converts your agent's text response into speech"
@@ -453,13 +453,13 @@ export default function ConfigPanel({
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+                </div> */}
 
                 {/* Voice Field */}
                 <div className="flex flex-col gap-2">
                   <FieldLabel
-                    label="Voice"
-                    description="The voice your agent will use when speaking"
+                    label="Voice (TTS)"
+                    description="Converts your agent’s text response into speech using the selected voice."
                   />
                   <SelectionDropdown
                     mode="voice"
@@ -571,8 +571,8 @@ export default function ConfigPanel({
           </div>
         </TabsContent>
 
-        {/* Actions Tab Content */}
-        <TabsContent value="actions" className="flex-1 min-h-0 overflow-auto m-0">
+        {/* Behavior Tab Content */}
+        <TabsContent value="behavior" className="flex-1 min-h-0 overflow-auto m-0">
           <div className="flex flex-col">
             {/* Tools Section - Collapsible */}
             <CollapsibleSection
@@ -580,7 +580,7 @@ export default function ConfigPanel({
               description="Define tools your agent can use to take actions"
               defaultOpen={true}
             >
-              <div className="flex flex-col gap-5 px-4 pb-5 border-b border-separator1">
+              <div className="flex flex-col gap-5 px-4 p-4 border-b border-separator1">
                 {/* Built-in Tools List */}
                 <div className="flex flex-col overflow-clip rounded pb-px">
                   {tools
