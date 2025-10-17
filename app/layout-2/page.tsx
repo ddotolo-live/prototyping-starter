@@ -1,18 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ProjectPageHeader } from "@/components/custom/project-page-header";
 import ConfigPanel from "@/components/custom/config-panel";
 import { CodePreviewPanel } from "@/components/custom/code-preview-panel";
 import { CallPreviewPanel } from "@/components/custom/call-preview-panel";
 import SegmentedControl from "@/components/custom/segmented-control";
-import { ChevronDownSmallIcon, ChainLink3Icon } from "@/icons/react";
+import { DeploymentPanel } from "@/components/custom/deployment-panel";
+import { ChainLink3Icon, CodeBracketsIcon } from "../../icons/react";
 import { mockTools } from "@/lib/mock-data";
 
 export default function Home() {
   // State management for active panel view
   const [activePanel, setActivePanel] = useState<"preview" | "code">("preview");
+
+  // State management for deployment panel
+  const [isDeploymentVisible, setIsDeploymentVisible] = useState(false);
+  const [isDeploymentExpanded, setIsDeploymentExpanded] = useState(false);
+  const [deploymentStatus, setDeploymentStatus] = useState<"deploying" | "success">("deploying");
 
   // State management for config panel
   const [config, setConfig] = useState({
@@ -62,12 +69,12 @@ export default function Home() {
         {/* Header Actions */}
         <div className="flex items-center gap-2">
           {/* Status Indicator */}
-          <div className="flex flex-col items-end gap-1 mr-2">
+          <div className="flex flex-col items-end gap-0 mr-2">
             <span className="text-[10px] font-mono uppercase tracking-wide text-fg4 font-bold">
               current status
             </span>
             <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-sm bg-[#28d96c]" />
+              <div className="w-1.5 h-1.5 bg-[#28d96c]" />
               <span className="text-[10px] font-mono uppercase tracking-wide text-[#28d96c] font-bold">
                 running
               </span>
@@ -77,27 +84,31 @@ export default function Home() {
           <div className="h-7 w-px bg-separator1" />
 
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="h-7 bg-bg2 border-separator1 text-fg1 hover:bg-bg3"
           >
-            More
-            <ChevronDownSmallIcon className="w-3 h-3 ml-1" />
+            Convert to code
+            <CodeBracketsIcon className="w-3 h-3 ml-1" />
+            {/* <ChevronDownSmallIcon className="w-3 h-3 ml-1" /> */}
           </Button>
 
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
-            className="h-7 bg-bg2 border-separator1 text-fg1 hover:bg-bg3"
           >
+            Share agent link
             <ChainLink3Icon className="w-3 h-3 mr-1" />
-            Copy link
-            <ChevronDownSmallIcon className="w-3 h-3 ml-1" />
           </Button>
 
           <Button
             size="sm"
-            className="h-7 bg-fgAccent1 text-bg1 hover:bg-[#1ac5e5]"
+            className="h-7 bg-fgAccent1 text-bg1 hover:bg-[#1ac5e5] disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => {
+              setIsDeploymentVisible(true);
+              setDeploymentStatus("deploying");
+              setIsDeploymentExpanded(false);
+            }}
+            disabled={isDeploymentVisible && deploymentStatus === "deploying"}
           >
             Deploy agent
           </Button>
@@ -126,78 +137,102 @@ export default function Home() {
           )}
         </div>
 
-        {/* Right Column - Config Panel */}
-        <div className="flex-1 overflow-hidden min-w-0 max-w-full">
-          <ConfigPanel
-            name={config.name}
-            systemInstructions={config.systemInstructions}
-            welcomeMessage={config.welcomeMessage}
-            enableGreeting={config.enableGreeting}
-            greetingType={config.greetingType}
-            allowInterrupt={config.allowInterrupt}
-            language={config.language}
-            pipelineMode={config.pipelineMode}
-            selectedVoice={config.selectedVoice}
-            realtimeProvider={config.realtimeProvider}
-            realtimeModel={config.realtimeModel}
-            secretName={config.secretName}
-            secretKey={config.secretKey}
-            llmModel={config.llmModel}
-            sttService={config.sttService}
-            ttsService={config.ttsService}
-            tools={config.tools}
-            onNameChange={(value) =>
-              setConfig((prev) => ({ ...prev, name: value }))
-            }
-            onSystemInstructionsChange={(value) =>
-              setConfig((prev) => ({ ...prev, systemInstructions: value }))
-            }
-            onWelcomeMessageChange={(value) =>
-              setConfig((prev) => ({ ...prev, welcomeMessage: value }))
-            }
-            onEnableGreetingChange={(value) =>
-              setConfig((prev) => ({ ...prev, enableGreeting: value }))
-            }
-            onGreetingTypeChange={(value) =>
-              setConfig((prev) => ({ ...prev, greetingType: value }))
-            }
-            onAllowInterruptChange={(value) =>
-              setConfig((prev) => ({ ...prev, allowInterrupt: value }))
-            }
-            onLanguageChange={(value) =>
-              setConfig((prev) => ({ ...prev, language: value }))
-            }
-            onPipelineModeChange={(value) =>
-              setConfig((prev) => ({ ...prev, pipelineMode: value }))
-            }
-            onVoiceChange={(value) =>
-              setConfig((prev) => ({ ...prev, selectedVoice: value }))
-            }
-            onRealtimeProviderChange={(value) =>
-              setConfig((prev) => ({ ...prev, realtimeProvider: value }))
-            }
-            onRealtimeModelChange={(value) =>
-              setConfig((prev) => ({ ...prev, realtimeModel: value }))
-            }
-            onSecretNameChange={(value) =>
-              setConfig((prev) => ({ ...prev, secretName: value }))
-            }
-            onSecretKeyChange={(value) =>
-              setConfig((prev) => ({ ...prev, secretKey: value }))
-            }
-            onLlmModelChange={(value) =>
-              setConfig((prev) => ({ ...prev, llmModel: value }))
-            }
-            onSttServiceChange={(value) =>
-              setConfig((prev) => ({ ...prev, sttService: value }))
-            }
-            onTtsServiceChange={(value) =>
-              setConfig((prev) => ({ ...prev, ttsService: value }))
-            }
-            onToolsChange={(tools) =>
-              setConfig((prev) => ({ ...prev, tools }))
-            }
-          />
+        {/* Right Column - Deployment Panel + Config Panel */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0 max-w-full">
+          {/* Deployment Panel */}
+          <AnimatePresence>
+            {isDeploymentVisible && (
+              <DeploymentPanel
+                status={deploymentStatus}
+                isExpanded={isDeploymentExpanded}
+                onExpandChange={setIsDeploymentExpanded}
+                onStatusChange={setDeploymentStatus}
+                onClose={() => {
+                  setIsDeploymentVisible(false);
+                  // Reset to deploying for next deployment
+                  setTimeout(() => setDeploymentStatus("deploying"), 300);
+                }}
+              />
+            )}
+          </AnimatePresence>
+
+          <motion.div
+            layout
+            transition={{ type: "spring" as const, damping: 28, stiffness: 320 }}
+            className="flex-1 min-h-0"
+          >
+            <ConfigPanel
+              name={config.name}
+              systemInstructions={config.systemInstructions}
+              welcomeMessage={config.welcomeMessage}
+              enableGreeting={config.enableGreeting}
+              greetingType={config.greetingType}
+              allowInterrupt={config.allowInterrupt}
+              language={config.language}
+              pipelineMode={config.pipelineMode}
+              selectedVoice={config.selectedVoice}
+              realtimeProvider={config.realtimeProvider}
+              realtimeModel={config.realtimeModel}
+              secretName={config.secretName}
+              secretKey={config.secretKey}
+              llmModel={config.llmModel}
+              sttService={config.sttService}
+              ttsService={config.ttsService}
+              tools={config.tools}
+              onNameChange={(value) =>
+                setConfig((prev) => ({ ...prev, name: value }))
+              }
+              onSystemInstructionsChange={(value) =>
+                setConfig((prev) => ({ ...prev, systemInstructions: value }))
+              }
+              onWelcomeMessageChange={(value) =>
+                setConfig((prev) => ({ ...prev, welcomeMessage: value }))
+              }
+              onEnableGreetingChange={(value) =>
+                setConfig((prev) => ({ ...prev, enableGreeting: value }))
+              }
+              onGreetingTypeChange={(value) =>
+                setConfig((prev) => ({ ...prev, greetingType: value }))
+              }
+              onAllowInterruptChange={(value) =>
+                setConfig((prev) => ({ ...prev, allowInterrupt: value }))
+              }
+              onLanguageChange={(value) =>
+                setConfig((prev) => ({ ...prev, language: value }))
+              }
+              onPipelineModeChange={(value) =>
+                setConfig((prev) => ({ ...prev, pipelineMode: value }))
+              }
+              onVoiceChange={(value) =>
+                setConfig((prev) => ({ ...prev, selectedVoice: value }))
+              }
+              onRealtimeProviderChange={(value) =>
+                setConfig((prev) => ({ ...prev, realtimeProvider: value }))
+              }
+              onRealtimeModelChange={(value) =>
+                setConfig((prev) => ({ ...prev, realtimeModel: value }))
+              }
+              onSecretNameChange={(value) =>
+                setConfig((prev) => ({ ...prev, secretName: value }))
+              }
+              onSecretKeyChange={(value) =>
+                setConfig((prev) => ({ ...prev, secretKey: value }))
+              }
+              onLlmModelChange={(value) =>
+                setConfig((prev) => ({ ...prev, llmModel: value }))
+              }
+              onSttServiceChange={(value) =>
+                setConfig((prev) => ({ ...prev, sttService: value }))
+              }
+              onTtsServiceChange={(value) =>
+                setConfig((prev) => ({ ...prev, ttsService: value }))
+              }
+              onToolsChange={(tools) =>
+                setConfig((prev) => ({ ...prev, tools }))
+              }
+              className="flex-1 min-h-0"
+            />
+          </motion.div>
         </div>
       </div>
     </div>

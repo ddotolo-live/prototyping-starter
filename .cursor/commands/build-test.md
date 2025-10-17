@@ -1,0 +1,1 @@
+We are ready to deploy to Vercel. Before we do that I want you to run a local build test to identify any potential errors during the deployment that would cause it to fail. 

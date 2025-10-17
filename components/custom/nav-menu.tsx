@@ -9,8 +9,8 @@ export function NavMenu() {
   const pathname = usePathname();
 
   const navItems = [
-    { label: "Layout 1", href: "/" },
-    { label: "Layout 2", href: "/layout-2" },
+    { label: "Home", href: "/" },
+    { label: "Agent builder", href: "/layout-2" },
   ];
 
   return (

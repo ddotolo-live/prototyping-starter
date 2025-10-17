@@ -44,8 +44,9 @@ import {
   type RealtimeModel,
 } from "@/lib/mock-data";
 import Toggle from "@/components/custom/toggle";
-import { CircleCheckIcon } from "@/icons/react";
+import { CircleCheckIcon, ArrowHistoryClock } from "../../icons/react";
 import AddToolPanel from "@/components/custom/add-tool-panel";
+import CollapsibleSection from "@/components/custom/collapsible-section";
 
 // TypeScript interfaces
 export interface ConfigPanelProps {
@@ -148,12 +149,11 @@ function TopBar() {
         <EditHistoryPanel
           trigger={
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
-              className="h-7 bg-bg2 border-separator1 text-fg1 hover:bg-bg3 font-semibold"
             >
               View edit history
-              <ChevronDown className="ml-1 h-3 w-3" />
+              <ArrowHistoryClock className="ml-1 h-3 w-3" />
             </Button>
           }
         />
@@ -573,125 +573,165 @@ export default function ConfigPanel({
 
         {/* Actions Tab Content */}
         <TabsContent value="actions" className="flex-1 min-h-0 overflow-auto m-0">
-          <div className="flex flex-col gap-5 p-4">
-            {/* Tools Section */}
-            <div className="flex flex-col gap-2">
-              <FieldLabel
-                label="Tools"
-                description="Define tools your agent can use to take actions"
-              />
-            </div>
-
-            {/* Built-in Tools */}
-            {tools
-              .filter((tool) => tool.isBuiltIn)
-              .map((tool) => (
-                <div
-                  key={tool.id}
-                  className="flex items-start gap-2 p-4 bg-bg2 border border-separator1 rounded"
-                >
-                  <div className="flex-1 flex flex-col gap-0.5">
-                    <p className="text-sm font-semibold text-fg1 leading-[1.5]">
-                      {tool.name}
-                    </p>
-                    <p className="text-sm font-normal text-fg2 leading-[1.5] line-clamp-2">
-                      {tool.description}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 h-7">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-8 p-0 hover:bg-bg3"
-                    >
-                      <Pencil className="h-3 w-3 text-fg1" />
-                    </Button>
-                    <Toggle
-                      checked={tool.enabled}
-                      onCheckedChange={(checked) => {
-                        const updatedTools = tools.map((t) =>
-                          t.id === tool.id ? { ...t, enabled: checked } : t
-                        );
-                        onToolsChange(updatedTools);
-                      }}
-                    />
-                  </div>
+          <div className="flex flex-col">
+            {/* Tools Section - Collapsible */}
+            <CollapsibleSection
+              title="Tools"
+              description="Define tools your agent can use to take actions"
+              defaultOpen={true}
+            >
+              <div className="flex flex-col gap-5 px-4 pb-5 border-b border-separator1">
+                {/* Built-in Tools List */}
+                <div className="flex flex-col overflow-clip rounded pb-px">
+                  {tools
+                    .filter((tool) => tool.isBuiltIn)
+                    .map((tool, index, arr) => {
+                      const isFirst = index === 0;
+                      const isLast = index === arr.length - 1;
+                      return (
+                        <div
+                          key={tool.id}
+                          className={cn(
+                            "flex items-start gap-2 p-3 bg-bg1 border border-separator1 mb-[-1px]",
+                            isFirst && "rounded-tl rounded-tr",
+                            isLast && "rounded-bl rounded-br"
+                          )}
+                        >
+                          <div className="flex-1 flex flex-col gap-0 leading-[1.5] min-w-0">
+                            <p className="text-xs font-semibold text-fg1">
+                              {tool.name}
+                            </p>
+                            <p className="text-xs font-normal text-fg2 max-w-[400px] overflow-ellipsis overflow-hidden whitespace-nowrap">
+                              {tool.description}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 h-7">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-8 p-0 hover:bg-bg3 rounded"
+                            >
+                              <Pencil className="h-3 w-3 text-fg1" />
+                            </Button>
+                            <Toggle
+                              checked={tool.enabled}
+                              onCheckedChange={(checked) => {
+                                const updatedTools = tools.map((t) =>
+                                  t.id === tool.id ? { ...t, enabled: checked } : t
+                                );
+                                onToolsChange(updatedTools);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
-              ))}
 
-            {/* Custom Tools Section */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-end justify-between pl-1">
-                <FieldLabel
-                  label="Custom tools"
-                  description="Define custom tools your agent can use to take actions"
-                />
-                <AddToolPanel
-                  onSave={(newTool) => {
-                    const updatedTools = [...tools, newTool];
-                    onToolsChange(updatedTools);
-                  }}
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-3 text-fg1 hover:bg-bg2 font-semibold text-xs"
-                    >
-                      <Plus className="h-3 w-3 mr-1" />
-                      Add tool
-                    </Button>
-                  }
-                />
-              </div>
-            </div>
-
-            {/* Custom Tool Items */}
-            {tools
-              .filter((tool) => !tool.isBuiltIn)
-              .map((tool) => (
-                <div
-                  key={tool.id}
-                  className="flex items-start gap-2 p-4 bg-bg2 border border-separator1 rounded"
-                >
-                  <div className="flex-1 flex flex-col gap-0.5">
-                    <p className="text-sm font-semibold text-fg1 leading-[1.5]">
-                      {tool.name}
-                    </p>
-                    <p className="text-sm font-normal text-fg2 leading-[1.5] line-clamp-2">
-                      {tool.description}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 h-7">
+                {/* Custom Tools Section */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-end justify-between pl-1">
+                    <div className="flex flex-col gap-0.5 flex-1">
+                      <p className="text-sm font-semibold text-fg1 leading-[1.5] whitespace-pre">
+                        Custom tools
+                      </p>
+                      <p className="text-xs font-normal text-fg3 leading-[1.5] whitespace-pre">
+                        Define custom tools your agent can use to take actions
+                      </p>
+                    </div>
                     <AddToolPanel
-                      tool={tool}
-                      onSave={(updatedTool) => {
-                        const updatedTools = tools.map((t) =>
-                          t.id === tool.id ? updatedTool : t
-                        );
+                      onSave={(newTool) => {
+                        const updatedTools = [...tools, newTool];
                         onToolsChange(updatedTools);
                       }}
                       trigger={
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 w-8 p-0 hover:bg-bg3"
+                          className="h-7 px-3 text-fg1 hover:bg-bg2 font-semibold text-xs rounded"
                         >
-                          <Pencil className="h-3 w-3 text-fg1" />
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add tool
                         </Button>
                       }
                     />
-                    <Toggle
-                      checked={tool.enabled}
-                      onCheckedChange={(checked) => {
-                        const updatedTools = tools.map((t) =>
-                          t.id === tool.id ? { ...t, enabled: checked } : t
-                        );
-                        onToolsChange(updatedTools);
-                      }}
-                    />
                   </div>
+
+                  {/* Custom Tool Items */}
+                  {tools.filter((tool) => !tool.isBuiltIn).length > 0 && (
+                    <div className="flex flex-col overflow-clip rounded pb-px">
+                      {tools
+                        .filter((tool) => !tool.isBuiltIn)
+                        .map((tool, index, arr) => {
+                          const isFirst = index === 0;
+                          const isLast = index === arr.length - 1;
+                          const isOnly = arr.length === 1;
+                          return (
+                            <div
+                              key={tool.id}
+                              className={cn(
+                                "flex items-start gap-2 p-3 bg-bg1 border border-separator1 mb-[-1px]",
+                                (isFirst || isOnly) && "rounded-tl rounded-tr",
+                                (isLast || isOnly) && "rounded-bl rounded-br"
+                              )}
+                            >
+                              <div className="flex-1 flex flex-col gap-0 leading-[1.5] min-w-0">
+                                <p className="text-xs font-semibold text-fg1">
+                                  {tool.name}
+                                </p>
+                                <p className="text-xs font-normal text-fg2 max-w-[400px] overflow-ellipsis overflow-hidden whitespace-nowrap">
+                                  {tool.description}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 h-7">
+                                <AddToolPanel
+                                  tool={tool}
+                                  onSave={(updatedTool) => {
+                                    const updatedTools = tools.map((t) =>
+                                      t.id === tool.id ? updatedTool : t
+                                    );
+                                    onToolsChange(updatedTools);
+                                  }}
+                                  trigger={
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-8 p-0 hover:bg-bg3 rounded"
+                                    >
+                                      <Pencil className="h-3 w-3 text-fg1" />
+                                    </Button>
+                                  }
+                                />
+                                <Toggle
+                                  checked={tool.enabled}
+                                  onCheckedChange={(checked) => {
+                                    const updatedTools = tools.map((t) =>
+                                      t.id === tool.id ? { ...t, enabled: checked } : t
+                                    );
+                                    onToolsChange(updatedTools);
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
                 </div>
-              ))}
+              </div>
+            </CollapsibleSection>
+
+            {/* Placeholder Collapsible Sections */}
+            <CollapsibleSection
+              title="Collapsable section"
+              description="A short description of the section."
+              defaultOpen={false}
+            />
+            <CollapsibleSection
+              title="Collapsable section"
+              description="A short description of the section."
+              defaultOpen={false}
+            />
           </div>
         </TabsContent>
       </Tabs>

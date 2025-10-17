@@ -389,7 +389,7 @@ export default function AddToolPanel({
         {/* Footer */}
         <div className="border-t border-separator1 px-6 py-4 flex items-center justify-between gap-2 flex-shrink-0">
           <Button
-            variant="link"
+            variant="ghost"
             size="sm"
             className="h-7 px-0 text-fgAccent1 hover:text-fgAccent1/80 font-semibold text-xs"
           >
