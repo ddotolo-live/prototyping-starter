@@ -23,7 +23,7 @@ const buttonVariants = cva(
           "border-border bg-background text-fg1 hover:border-intense hover:bg-bg2 hover:text-foreground active:bg-background",
         ghost: "border-none bg-transparent text-fg1 hover:bg-accent active:bg-transparent",
         destructive:
-          "border-destructive bg-serious1 text-fgSerious1 hover:border-transparent hover:bg-fgSerious1 hover:text-background focus-visible:ring-destructive active:bg-fgSerious1",
+          "border-destructive bg-bgSerious1 text-fgSerious1 hover:border-transparent hover:bg-fgSerious1 hover:text-background focus-visible:ring-destructive active:bg-fgSerious1",
       },
       size: {
         sm: "h-7 px-2 py-1 text-xs font-semibold",
